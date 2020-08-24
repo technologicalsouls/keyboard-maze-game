@@ -10,6 +10,8 @@ const {
 const cells = 3;
 const width = 600;
 const height = 600;
+//unit relative to above dimen
+const unitLength = width / cells;
 
 const engine = Engine.create();
 const { world } = engine;
@@ -123,7 +125,45 @@ const stepThroughCell = (row, column) => {
 
 };
 
-
 stepThroughCell(startRow, startColumn);
 // stepThroughCell(1, 1);
 // console.log(horizontals);
+
+// draw grid lines (MatterJS rectangles)
+//draw rows
+horizontals.forEach( (row, rowIndex) => {
+    row.forEach( (open, columnIndex) => {
+        if (open) {
+            return;
+        }
+        //draw rectangle
+        const wall = Bodies.rectangle(
+            columnIndex * unitLength + (unitLength / 2),
+            rowIndex * unitLength + unitLength,
+            unitLength,
+            1,
+            {
+                isStatic: true
+            }
+        );
+        World.add(world, wall);
+    });
+})
+
+verticals.forEach((row, rowIndex) => {
+    row.forEach((open, columnIndex) => {
+        if (open) {
+            return;
+        }
+        const wall = Bodies.rectangle(
+            columnIndex * unitLength + unitLength,
+            rowIndex * unitLength + (unitLength / 2),
+            1,
+            unitLength,
+            {
+                isStatic: true
+            }
+        );
+        World.add(world, wall);
+    });
+});
