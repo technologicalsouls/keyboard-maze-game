@@ -9,11 +9,13 @@ const {
     Events
 } = Matter;
 
-const cells = 13;
-const width = 600;
-const height = 600;
-//unit relative to above dimen
-const unitLength = width / cells;
+const cellsHorizontal = 4;
+const cellsVertical = 3;
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+const unitLengthX = width / cellsHorizontal;
+const unitLengthY = height / cellsVertical;
 
 const engine = Engine.create();
 
@@ -43,6 +45,7 @@ const walls = [
 World.add(world, walls);
 
 // MAZE (grid) GENERATION
+
 //shuffle -  for neighbors
 const shuffle = (arr) => {
     let counter = arr.length;
@@ -61,27 +64,28 @@ const shuffle = (arr) => {
     return arr;
 };
 
-const grid = Array(cells) //rows
+//Grid - Verticals and Horizontals
+const grid = Array(cellsVertical) //number of rows
     .fill(null)
-    .map(() => Array(cells).fill(false)); //columns
+    .map(() => Array(cellsHorizontal).fill(false)); //columns
 
 // VERTICAL ARRAYS
-const verticals = Array(cells).
+const verticals = Array(cellsVertical).
     fill(null)
-    .map(() => Array(cells-1).fill(false));
+    .map(() => Array(cellsHorizontal - 1).fill(false));
 
 // HORIZONTAL ARRAYS
-const horizontals = Array(cells-1)
+const horizontals = Array(cellsVertical -1)
     .fill(null)
-    .map(() => Array(cells).fill(false));
+    .map(() => Array(cellsHorizontal).fill(false));
 
 // console.log(grid);
 
 // PICK RANDOM STARTING CELL - starting point
 //need index of vert and hori (random between 0-2)
 //mult cells var by random number
-const startRow = Math.floor(Math.random() * cells);
-const startColumn = Math.floor(Math.random() * cells);
+const startRow = Math.floor(Math.random() * cellsVertical);
+const startColumn = Math.floor(Math.random() * cellsHorizontal);
 
 //FOR THAT CELL - build a randomly-ordered list of neighbors
 const stepThroughCell = (row, column) => {
@@ -105,7 +109,12 @@ const stepThroughCell = (row, column) => {
     for (let neighbor of neighbors) {
         const [nextRow, nextColumn, direction] = neighbor;
         //EXTREME CASES - see if that neighbor is out of bounds
-        if (nextRow < 0 || nextRow >= cells || nextColumn < 0 || nextColumn >= cells) {
+        if (
+            nextRow < 0 ||
+            nextRow >= cellsVertical ||
+            nextColumn < 0 ||
+            nextColumn >= cellsHorizontal
+        ) {
             continue; //don't leave for loop, just move on
         }
         //if we have visited that neigh, contn to next neighbor
@@ -126,8 +135,6 @@ const stepThroughCell = (row, column) => {
         }
         stepThroughCell(nextRow, nextColumn);
     }
-    //visit that next cell
-
 };
 
 stepThroughCell(startRow, startColumn);
@@ -136,16 +143,16 @@ stepThroughCell(startRow, startColumn);
 
 // draw grid lines (MatterJS rectangles)
 //draw rows
-horizontals.forEach( (row, rowIndex) => {
-    row.forEach( (open, columnIndex) => {
+horizontals.forEach((row, rowIndex) => {
+    row.forEach((open, columnIndex) => {
         if (open) {
             return;
         }
         //draw rectangle
         const wall = Bodies.rectangle(
-            columnIndex * unitLength + (unitLength / 2),
-            rowIndex * unitLength + unitLength,
-            unitLength,
+            columnIndex * unitLengthX + (unitLengthX / 2),  //center x direction
+            rowIndex * unitLengthY + unitLengthY, //y dir
+            unitLengthX,
             1,
             {
                 label: 'wall',
@@ -162,10 +169,10 @@ verticals.forEach((row, rowIndex) => {
             return;
         }
         const wall = Bodies.rectangle(
-            columnIndex * unitLength + unitLength,
-            rowIndex * unitLength + (unitLength / 2),
+            columnIndex * unitLengthX + unitLengthX,
+            rowIndex * unitLengthY + (unitLengthY / 2),
             3,
-            unitLength,
+            unitLengthY,
             {
                 label: 'wall',
                 isStatic: true
@@ -177,10 +184,10 @@ verticals.forEach((row, rowIndex) => {
 
 // GOAL
 const goal = Bodies.rectangle(
-    width - (unitLength / 2),
-    height - (unitLength / 2),
-    unitLength * 0.6,
-    unitLength * 0.6,
+    width - (unitLengthX / 2),
+    height - (unitLengthY / 2),
+    unitLengthX * 0.6,
+    unitLengthY * 0.6,
     {
         isStatic: true,
         label: 'goal',
@@ -189,10 +196,11 @@ const goal = Bodies.rectangle(
 World.add(world, goal);
 
 // BALL
+const ballRadius = Math.min(unitLengthX, unitLengthY)/4;
 const ball = Bodies.circle(
-    unitLength / 2,
-    unitLength / 2,
-    unitLength / 4,
+    unitLengthX / 2,
+    unitLengthY / 2,
+    ballRadius,
     {
         label: 'ball'
     }
