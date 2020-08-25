@@ -26,7 +26,7 @@ const render = Render.create({
     element: document.body,
     engine: engine,
     options: {
-        wireframes:true,
+        wireframes:false,
         width,
         height
     }
@@ -35,7 +35,7 @@ Render.run(render);
 Runner.run(Runner.create(), engine);
 //end of Matter set up
 
-// WALLS
+// WALLS- WINDOW FRAME -
 const walls = [
     Bodies.rectangle(width/2, 0, width, 2, {isStatic: true}),
     Bodies.rectangle(width/2, height, width, 2, {isStatic: true}),
@@ -153,10 +153,13 @@ horizontals.forEach((row, rowIndex) => {
             columnIndex * unitLengthX + (unitLengthX / 2),  //center x direction
             rowIndex * unitLengthY + unitLengthY, //y dir
             unitLengthX,
-            1,
+            5,
             {
                 label: 'wall',
-                isStatic: true
+                isStatic: true,
+                render: {
+                    fillStyle: 'gray'
+                }
             }
         );
         World.add(world, wall);
@@ -171,11 +174,14 @@ verticals.forEach((row, rowIndex) => {
         const wall = Bodies.rectangle(
             columnIndex * unitLengthX + unitLengthX,
             rowIndex * unitLengthY + (unitLengthY / 2),
-            3,
+            5,
             unitLengthY,
             {
                 label: 'wall',
-                isStatic: true
+                isStatic: true,
+                render: {
+                    fillStyle: 'gray'
+                }
             }
         );
         World.add(world, wall);
@@ -191,6 +197,9 @@ const goal = Bodies.rectangle(
     {
         isStatic: true,
         label: 'goal',
+        render: {
+            fillStyle: 'pink'
+        }
     }
 );
 World.add(world, goal);
@@ -202,7 +211,10 @@ const ball = Bodies.circle(
     unitLengthY / 2,
     ballRadius,
     {
-        label: 'ball'
+        label: 'ball',
+        render: {
+            fillStyle: 'white'
+        }
     }
 );
 World.add(world, ball);
@@ -235,6 +247,7 @@ Events.on(engine, 'collisionStart', event => {
             labels.includes(collision.bodyA.label) &&
             labels.includes(collision.bodyB.label)
         ) {
+            document.querySelector('.winner').classList.remove('hidden');
             //turn gravity back on
             world.gravity.y = 1;
             //loop over all walls - remove static flag
