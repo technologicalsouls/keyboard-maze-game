@@ -5,7 +5,8 @@ const {
     Runner,
     World,
     Bodies,
-    Body
+    Body,
+    Events
 } = Matter;
 
 const cells = 13;
@@ -14,9 +15,10 @@ const height = 600;
 //unit relative to above dimen
 const unitLength = width / cells;
 
-
-
 const engine = Engine.create();
+
+engine.world.gravity.y = 0; //disable gravity
+
 const { world } = engine;
 const render = Render.create({
     element: document.body,
@@ -146,6 +148,7 @@ horizontals.forEach( (row, rowIndex) => {
             unitLength,
             1,
             {
+                label: 'wall',
                 isStatic: true
             }
         );
@@ -161,9 +164,10 @@ verticals.forEach((row, rowIndex) => {
         const wall = Bodies.rectangle(
             columnIndex * unitLength + unitLength,
             rowIndex * unitLength + (unitLength / 2),
-            1,
+            3,
             unitLength,
             {
+                label: 'wall',
                 isStatic: true
             }
         );
@@ -178,7 +182,8 @@ const goal = Bodies.rectangle(
     unitLength * 0.6,
     unitLength * 0.6,
     {
-        isStatic: true
+        isStatic: true,
+        label: 'goal',
     }
 );
 World.add(world, goal);
@@ -188,12 +193,14 @@ const ball = Bodies.circle(
     unitLength / 2,
     unitLength / 2,
     unitLength / 4,
+    {
+        label: 'ball'
+    }
 );
 World.add(world, ball);
 
 document.addEventListener('keydown', event => {
     const { x, y } = ball.velocity;
-    console.log(x, y);
     if (event.keyCode === 87) {
         // console.log('move ball up');
         Body.setVelocity(ball, {x, y: y - 5 });
@@ -210,4 +217,24 @@ document.addEventListener('keydown', event => {
         // console.log('move ball left');
         Body.setVelocity(ball, {x: x-5, y: y });
     }
+});
+
+// WIN CONDITION
+Events.on(engine, 'collisionStart', event => {
+    event.pairs.forEach( collision => {
+        const labels = ['ball', 'goal'];
+        if (
+            labels.includes(collision.bodyA.label) &&
+            labels.includes(collision.bodyB.label)
+        ) {
+            //turn gravity back on
+            world.gravity.y = 1;
+            //loop over all walls - remove static flag
+            world.bodies.forEach(body => {
+                if (body.label === 'wall') {
+                    Body.setStatic(body, false);
+                }
+            });
+        }
+    });
 });
