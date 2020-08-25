@@ -9,8 +9,8 @@ const {
     Events
 } = Matter;
 
-const cellsHorizontal = 4;
-const cellsVertical = 3;
+const cellsHorizontal = 8;
+const cellsVertical = 6;
 const width = window.innerWidth;
 const height = window.innerHeight;
 
@@ -153,7 +153,7 @@ horizontals.forEach((row, rowIndex) => {
             columnIndex * unitLengthX + (unitLengthX / 2),  //center x direction
             rowIndex * unitLengthY + unitLengthY, //y dir
             unitLengthX,
-            5,
+            1,
             {
                 label: 'wall',
                 isStatic: true,
@@ -174,7 +174,7 @@ verticals.forEach((row, rowIndex) => {
         const wall = Bodies.rectangle(
             columnIndex * unitLengthX + unitLengthX,
             rowIndex * unitLengthY + (unitLengthY / 2),
-            5,
+            1,
             unitLengthY,
             {
                 label: 'wall',
